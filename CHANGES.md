@@ -29,6 +29,7 @@
 - `setString` solo cuando el texto cambió; recuento de mods re-escaneado cada 5 s; `-march=armv8-a` eliminado.
 
 ## Eliminado a propósito
+- Soporte de macOS e iOS (solo Windows + Android).
 - Hooks de `PauseLayer` ("Paused" nunca se mostraba) y `ProfilePage` (es un popup, dejaba el nombre pegado).
 
 ## ⚠️ No compilado — verificar al compilar

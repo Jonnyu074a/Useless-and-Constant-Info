@@ -62,10 +62,6 @@ struct StaticCache {
         geodeVersion = fmt::format("{}.{}.{}", v.getMajor(), v.getMinor(), v.getPatch());
         #if defined(GEODE_IS_WINDOWS)
             osBase = "Windows";
-        #elif defined(GEODE_IS_MACOS)
-            osBase = "macOS";
-        #elif defined(GEODE_IS_IOS)
-            osBase = "iOS";
         #else
             osBase = "Android";
         #endif
