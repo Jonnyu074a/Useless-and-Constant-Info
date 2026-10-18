@@ -1,17 +1,72 @@
 {
-	"geode": "$GEODE_VERSION",
-	"gd": {
-		"win": "2.2081",
-		"android": "2.2081",
-		"mac": "2.2081",
-		"ios": "2.2081"
-	},
-	"id": "$MOD_ID",
-	"name": "$MOD_NAME",
-	"version": "$MOD_VERSION",
-	"developer": "$MOD_DEVELOPER",
-	"description": "$MOD_DESCRIPTION",
-	"dependencies": {
-		"geode.node-ids": ">=v1.23.3"
+	"geode": ">=5.0.0",
+	"gd": { "win": "2.2081", "android": "2.2081", "mac": "2.2081" },
+	"id": "jonnyuun.advanced-info-overlay",
+	"name": "Useless And Constant info",
+	"version": "v5.2.0",
+	"developer": "jonnyuun",
+	"description": "Customizable real-time HUD for Geometry Dash. Shows FPS, CPS, accuracy, level info, time, session, mod menus and more. Open settings from the HUD button next to the Daily Chest.",
+	"repository": "https://github.com/jonnyuun/advanced-info-overlay",
+	"issues": { "url": "https://github.com/jonnyuun/advanced-info-overlay/issues" },
+	"tags": ["interface", "utility", "customization", "gameplay"],
+	"changelog": "## v5.2.0\n\n**Fixes:**\n- Settings window rebuilt on `geode::Popup` and resized to fit the screen; touches no longer pass through\n- Settings are applied and saved immediately; saving can no longer overwrite pending changes\n- Drag-to-reposition keeps the selected corner and now persists offsets\n- Real color picker (`ColorPickPopup`)\n- CPS counts jumps again; accuracy is noclip-aware; deaths are no longer double counted\n- Session timer no longer resets on focus loss; play time is flushed every 60 s\n- Mod menu detection is local-only (no network, no uninstalled mods)\n- HUD button is placed next to the Daily Chest; hide on enter/leave level fixed\n- Level/user names containing braces or separators no longer break the label\n\n## v5.1.0\n\n**Performance:**\n- Static cache (dirty flags) for GD version, Geode version, OS, mod count — computed once, never recalculated\n- All string building uses `fmt::format` instead of `std::stringstream`\n- `InfoOverlay::applyVisuals` only recreates label node when font actually changes\n- Z-Order raised to 999999 (above all GD layers)\n- Dynamic resolution detection: `updatePosition()` auto-called when window size changes\n\n**New Tags:**\n- `{cps}` — Clicks Per Second (rolling 1-second window via `PlayLayer::pushButton` hook)\n- `{accuracy}` — Noclip accuracy as frames_alive/frames_total %. Optional: only show with Noclip active\n- `{deaths}` — Session deaths or total attempts\n- `{session_total}` — Persistent total play time across sessions (saved with `setSavedValue`)\n\n**UI:**\n- Real `ColorPickPopup` for text and background colors\n- Preset buttons: Minimalist, Standard, Developer\n- Live preview label in Builder tab updates as you add tags\n- Drag-to-reposition: enable drag mode in General tab, drag overlay to desired position\n- Tab styles update to show active tab\n\n**Polish:**\n- Separator cleanup uses `std::regex` — handles any separator string, not just ` | `\n- Month names in English (suitable for Geode Index global release)\n- Play time flushed to disk on `applicationWillResignActive`\n- CPS timestamps cleared on level entry\n\n## v5.0.0\n- Multi-file architecture, custom UI, OverlayManager, all screen tracking\n\n## v4.0.0 — v1.0.0\n- See GitHub for full history",
+	"settings": {
+		"enabled":               { "type": "bool",   "name": "Enable Overlay",        "default": true },
+		"position-mode":         { "type": "string", "name": "Position",              "default": "Bottom-Right",
+		                           "one-of": ["Top-Left","Top-Right","Bottom-Left","Bottom-Right","Top-Center","Bottom-Center"] },
+		"offset-x":              { "type": "int",    "name": "Offset X",              "default": 5,    "min": -2000, "max": 2000 },
+		"offset-y":              { "type": "int",    "name": "Offset Y",              "default": 5,    "min": -2000, "max": 2000 },
+		"font-type":             { "type": "string", "name": "Font",                  "default": "chatFont.fnt",
+		                           "one-of": ["chatFont.fnt","goldFont.fnt","bigFont.fnt","gjFont01.fnt"] },
+		"text-scale":            { "type": "float",  "name": "Text Scale",            "default": 0.45, "min": 0.2, "max": 1.2,
+		                           "control": { "slider": true, "step": 0.05 } },
+		"text-color":            { "type": "color",  "name": "Text Color",            "default": "#FFFFFF" },
+		"text-opacity":          { "type": "int",    "name": "Text Opacity",          "default": 255, "min": 0, "max": 255,
+		                           "control": { "slider": true } },
+		"show-bg":               { "type": "bool",   "name": "Show Background",       "default": true },
+		"bg-color":              { "type": "color",  "name": "Background Color",      "default": "#000000" },
+		"bg-opacity":            { "type": "int",    "name": "Background Opacity",    "default": 130, "min": 0, "max": 255,
+		                           "control": { "slider": true } },
+		"bg-padding":            { "type": "int",    "name": "Background Padding",    "default": 8,   "min": 0, "max": 30,
+		                           "control": { "slider": true } },
+		"update-rate":           { "type": "float",  "name": "Update Rate (s)",       "default": 0.25,"min": 0.05,"max": 2.0,
+		                           "control": { "slider": true, "step": 0.05 } },
+		"hide-on-enter-level":   { "type": "bool",   "name": "Hide on Enter Level",   "default": false },
+		"hide-on-exit-level":    { "type": "bool",   "name": "Hide on Exit Level",    "default": false },
+		"color-coding":          { "type": "bool",   "name": "FPS Color Coding",      "default": false },
+		"layout-mode":           { "type": "string", "name": "Layout",                "default": "Horizontal",
+		                           "one-of": ["Horizontal","Vertical"] },
+		"separator":             { "type": "string", "name": "Separator",             "default": " | " },
+		"format-string":         { "type": "string", "name": "Format String",
+		                           "default": "{fps} | {gd} | {geode} | {mods} | {os} | {user} | {mh} | {date} | {time} | {session} | {session_total} | {lvl} | {lvlid} | {att} | {best} | {progress} | {practice} | {cps} | {accuracy} | {deaths}" },
+
+		"fps-show-fps":          { "type": "bool",   "name": "FPS: Show FPS",         "default": true },
+		"fps-show-tps":          { "type": "bool",   "name": "FPS: Show TPS",         "default": true },
+		"fps-show-together":     { "type": "bool",   "name": "FPS: Show as 60/60",    "default": true },
+		"fps-show-target":       { "type": "bool",   "name": "FPS: Show Target Hz",   "default": false },
+
+		"cps-enabled":           { "type": "bool",   "name": "CPS: Enable",           "default": true },
+
+		"accuracy-enabled":      { "type": "bool",   "name": "Accuracy: Enable",      "default": true },
+		"accuracy-require-noclip":{ "type": "bool",  "name": "Accuracy: Only with Noclip","default": false },
+
+		"deaths-show":           { "type": "bool",   "name": "Deaths: Show",          "default": true },
+		"deaths-show-session":   { "type": "bool",   "name": "Deaths: Session only",  "default": true },
+
+		"mods-only-active":      { "type": "bool",   "name": "Mods: Only Active",     "default": false },
+
+		"os-show-bits":          { "type": "bool",   "name": "OS: Show 32/64 bits",   "default": false },
+		"os-android-override":   { "type": "int",    "name": "OS: Android Override",  "default": 0, "min": 0, "max": 2 },
+
+		"user-show-name":        { "type": "bool",   "name": "User: Show Name",       "default": true },
+
+		"date-format":           { "type": "int",    "name": "Date: Format (0-2)",    "default": 0, "min": 0, "max": 2 },
+
+		"time-24h":              { "type": "bool",   "name": "Time: 24h",             "default": true },
+		"time-show-seconds":     { "type": "bool",   "name": "Time: Show Seconds",    "default": true },
+
+		"session-show-seconds":  { "type": "bool",   "name": "Session: Show Seconds", "default": true },
+
+		"lvl-show-author":       { "type": "bool",   "name": "Level: Show Author",    "default": true }
 	}
 }
