@@ -14,7 +14,7 @@ namespace uaci {
 
 // Reads GD "SeedValueRSV"-like wrappers (.value()) or plain ints, whichever the bindings use.
 template <class T>
-inline int valInt(T const& v) {
+inline int valInt(T& v) {   // non-const: SeedValue*::value() / operator int() are not const
     if constexpr (requires { v.value(); }) return static_cast<int>(v.value());
     else return static_cast<int>(v);
 }

@@ -89,12 +89,11 @@ class $modify(UACIBase, GJBaseGameLayer) {
         GJBaseGameLayer::handleButton(down, button, isPlayer1);
     }
 
-    // One call per physics step → real TPS.
-    // NOTE: if your bindings don't expose processCommands, delete this hook; TPS then
-    // falls back to FPS automatically (g_tickCounter stays 0).
-    void processCommands(float dt) {
+    // One call per physics step → real TPS (signature verified against 2.2081 bindings).
+    // If it ever misreports (e.g. half-ticks counted twice), count only when !isHalfTick.
+    void processCommands(float dt, bool isHalfTick, bool isLastTick) {
         g_tickCounter++;
-        GJBaseGameLayer::processCommands(dt);
+        GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
     }
 };
 
