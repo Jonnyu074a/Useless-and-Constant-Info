@@ -1,3 +1,15 @@
+# Ronda 2 (bugs reportados en el dispositivo)
+
+- **Crash al volver al juego** (`AppDelegate::pauseSound()`, SIGILL): eliminado el hook de `AppDelegate`. El tiempo de juego se guarda cada 30 s desde el overlay.
+- **Texto bajo el icono HUD**: eliminado.
+- **Label de pantalla**: ahora se detecta en vivo (popup superior de cualquier mod, p. ej. MegaHack, o la capa principal de la escena) con `geode::cocos::getObjectName`. Se quitaron los hooks por capa.
+- **Colores sobre el texto**: ahora son filas con el swatch como botón.
+- **Scroll que subía al elegir una opción**: se conserva la posición (solo al cambiar de pestaña va arriba).
+- **Página del mod**: añadidos `about.md`, `changelog.md` y `logo.png` (Geode no lee el campo `changelog` de `mod.json`; se quitó). **Sustituye los de la plantilla en tu repo.**
+- **Ventana rediseñada**: filas en paneles, iconos en pestañas, botón "i" con popup explicativo en cada opción y secciones, referencia de tags en el Builder, sección About.
+
+---
+
 # v5.2.0 — correcciones
 
 **Estructura:** `include/` · `src/main.cpp` · `src/hooks/MenuLayer.cpp` · `src/ui/SettingsLayer.*` · `src/utils/Helpers.*`

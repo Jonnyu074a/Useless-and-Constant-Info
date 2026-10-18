@@ -95,8 +95,8 @@ public:
     void update(float) override {
         double now = nowSeconds();
 
-        // Persist play time every 60 s (covers desktop closes / crashes).
-        if (now - m_lastFlush > 60.0) { flushPlayTime(); m_lastFlush = now; }
+        // Persist play time every 30 s (covers closes / crashes without any app-lifecycle hook).
+        if (now - m_lastFlush > 30.0) { flushPlayTime(); m_lastFlush = now; }
 
         if (!g_config.enabled || m_hidden) {
             m_frames = 0; m_windowStart = now; m_lastTicks = g_tickCounter;
@@ -216,7 +216,7 @@ public:
             lvl = ed->m_level
                 ? std::string(ed->m_level->m_levelName) + " [Editor]" : std::string("Editor");
         } else {
-            lvl = g_currentScreen;
+            lvl = detectScreenName();
         }
         v["lvl"] = lvl;       v["lvlid"] = lvlid;   v["att"] = att;
         v["best"] = best;     v["progress"] = prog; v["practice"] = practice;

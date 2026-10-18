@@ -15,13 +15,13 @@ namespace uaci {
 // Window size is 400x290: GD's design height is 320, so it always fits on screen.
 class SettingsLayer : public geode::Popup {
 protected:
-    int            m_tab       = 0;
-    CCMenu*        m_tabMenu   = nullptr;
-    ScrollLayer*   m_scroll    = nullptr;
-    TextInput*     m_fmtInput  = nullptr;
-    CCLabelBMFont* m_preview   = nullptr;
-    CCLayerColor*  m_textSwatch = nullptr;
-    CCLayerColor*  m_bgSwatch   = nullptr;
+    int             m_tab        = 0;
+    CCMenu*         m_tabMenu    = nullptr;
+    ScrollLayer*    m_scroll     = nullptr;
+    TextInput*      m_fmtInput   = nullptr;
+    CCLabelBMFont*  m_preview    = nullptr;
+    CCScale9Sprite* m_textSwatch = nullptr;
+    CCScale9Sprite* m_bgSwatch   = nullptr;
 
     // Builder draft (survives tab switches until Apply)
     std::string              m_draft;
@@ -32,8 +32,10 @@ protected:
     bool init();
 
     void buildTabs();
-    void loadTab(int t);
-    void reloadTabSoon(int t);   // deferred: never destroys the button that is being clicked
+    // keepScroll=true restores the previous scroll position (used when an option
+    // only re-highlights its buttons); false jumps to the top (used when switching tabs).
+    void loadTab(int t, bool keepScroll = false);
+    void reloadTabSoon(int t, bool keepScroll = true);   // deferred: never destroys the button being clicked
     void buildGeneral(CCNode* c);
     void buildLabels(CCNode* c);
     void buildVisual(CCNode* c);
@@ -43,6 +45,7 @@ protected:
     void updateSwatches();
 
     void onTab(CCObject*);
+    void onInfo(CCObject*);
     void onToggle(CCObject*);
     void onPosition(CCObject*);
     void onStartDrag(CCObject*);

@@ -28,6 +28,10 @@ TagMap sampleTags();
 // Name/version of a locally installed mod menu ("" if none).
 std::string getModMenuDisplay();
 
+// Name of what the user is looking at right now: the top-most popup (including other
+// mods' menus such as MegaHack) or, failing that, the main layer of the running scene.
+std::string detectScreenName();
+
 int getTargetFPS();
 
 } // namespace uaci

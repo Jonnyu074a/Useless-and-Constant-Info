@@ -4,6 +4,7 @@
 #include <ctime>
 #include <chrono>
 #include <cmath>
+#include <cctype>
 #include <vector>
 #include <algorithm>
 
@@ -123,6 +124,81 @@ TagMap sampleTags() {
         {"att", "Att: 42"}, {"best", "Best: 87%"}, {"progress", "54%"},
         {"practice", "[Practice]"}, {"accuracy", "97.3%"}, {"deaths", "Deaths: 5"},
     };
+}
+
+
+// ── Screen detection ──────────────────────────────────────────────────────────
+
+// "GJShopLayer" -> "GJ Shop", "LevelBrowserLayer" -> "Level Browser", "mh::ModMenu" -> "Mod Menu"
+static std::string prettyClassName(std::string raw) {
+    static const std::pair<const char*, const char*> known[] = {
+        {"MenuLayer", "Main Menu"},         {"CreatorLayer", "Creator Menu"},
+        {"GJGarageLayer", "Icon Kit"},      {"LevelSelectLayer", "Level Select"},
+        {"LevelEditorLayer", "Editor"},     {"LevelBrowserLayer", "Level Browser"},
+        {"LevelInfoLayer", "Level Info"},   {"EditLevelLayer", "Edit Level"},
+        {"ModsLayer", "Geode Mods"},        {"LoadingLayer", "Loading"},
+    };
+
+    auto pos = raw.rfind("::");
+    if (pos != std::string::npos) raw = raw.substr(pos + 2);
+    for (auto& [k, v] : known) if (raw == k) return v;
+
+    for (const char* suffix : {"Layer", "Popup", "Scene"}) {
+        std::string sf = suffix;
+        if (raw.size() > sf.size() && raw.compare(raw.size() - sf.size(), sf.size(), sf) == 0) {
+            raw.erase(raw.size() - sf.size());
+            break;
+        }
+    }
+    if (raw.empty()) return "Menu";
+
+    std::string out;
+    for (size_t i = 0; i < raw.size(); i++) {
+        char c = raw[i];
+        if (i > 0 && std::isupper(static_cast<unsigned char>(c))) {
+            char p = raw[i - 1];
+            char n = i + 1 < raw.size() ? raw[i + 1] : 'A';
+            if (std::islower(static_cast<unsigned char>(p)) ||
+               (std::isupper(static_cast<unsigned char>(p)) && std::islower(static_cast<unsigned char>(n))))
+                out += ' ';
+        }
+        out += c;
+    }
+    return out;
+}
+
+static CCNode* topAlert(CCNode* parent) {
+    if (!parent || !parent->getChildren()) return nullptr;
+    CCNode* top = nullptr;
+    for (auto* child : CCArrayExt<CCNode*>(parent->getChildren())) {
+        if (!child) continue;
+        std::string id = std::string(child->getID());
+        if (id.rfind("uaci-", 0) == 0) continue;            // ignore our own windows
+        if (typeinfo_cast<FLAlertLayer*>(child)) top = child; // later children are drawn on top
+    }
+    return top;
+}
+
+std::string detectScreenName() {
+    static std::string last = "Menu";
+
+    auto* scene = CCDirector::sharedDirector()->getRunningScene();
+    if (!scene) return last;
+
+    // Mid-transition: keep the previous name instead of flickering.
+    if (std::string(geode::cocos::getObjectName(scene)).rfind("CCTransition", 0) == 0)
+        return last;
+
+    // 1) Top-most popup: GD alerts, Geode popups and other mods' menus (MegaHack...).
+    CCNode* node = topAlert(OverlayManager::get());
+    if (!node) node = topAlert(scene);
+
+    // 2) Otherwise the main layer of the scene.
+    if (!node && scene->getChildren() && scene->getChildren()->count() > 0)
+        node = static_cast<CCNode*>(scene->getChildren()->objectAtIndex(0));
+
+    if (node) last = prettyClassName(std::string(geode::cocos::getObjectName(node)));
+    return last;
 }
 
 // ── FPS ───────────────────────────────────────────────────────────────────────

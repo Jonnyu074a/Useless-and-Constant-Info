@@ -24,17 +24,6 @@ inline double nowSeconds() {
         std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
-// ── Screen name ───────────────────────────────────────────────────────────────
-// Layers call setScreen() in init(); CCDirector::willSwitchToScene consumes the
-// "fresh" flag. If no known layer announced itself, the screen falls back to "Menu"
-// instead of keeping a stale name.
-inline std::string g_currentScreen = "Menu";
-inline bool        g_screenFresh   = false;
-inline void setScreen(std::string name) {
-    g_currentScreen = std::move(name);
-    g_screenFresh   = true;
-}
-
 // While true, the "any setting changed" listener ignores events (we are saving
 // our own values and must not reload half-written state).
 inline bool g_suppressReload = false;

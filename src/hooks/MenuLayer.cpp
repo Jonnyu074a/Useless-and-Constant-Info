@@ -2,10 +2,6 @@
 #include <Geode/modify/MenuLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
-#include <Geode/modify/LevelEditorLayer.hpp>
-#include <Geode/modify/LevelSelectLayer.hpp>
-#include <Geode/modify/GJGarageLayer.hpp>
-#include <Geode/modify/CreatorLayer.hpp>
 #include "../../include/UACI.hpp"
 #include "../../include/LabelConfig.hpp"
 #include "../../include/InfoOverlay.hpp"
@@ -18,15 +14,11 @@ static void setOverlayHidden(bool hidden) {
     if (auto* ov = getOverlay()) ov->setHidden(hidden);
 }
 
-// ── Overlay injection + screen-name bookkeeping ───────────────────────────────
+// ── Overlay injection ───────────────────────────────
 
 class $modify(UACIDirector, CCDirector) {
     void willSwitchToScene(CCScene* scene) {
         CCDirector::willSwitchToScene(scene);
-
-        // No known layer announced itself for this scene → don't keep a stale name.
-        if (!g_screenFresh) g_currentScreen = "Menu";
-        g_screenFresh = false;
 
         if (auto* om = OverlayManager::get()) {
             if (!om->getChildByID("uaci-overlay")) {
@@ -41,19 +33,11 @@ class $modify(UACIDirector, CCDirector) {
 class $modify(UACIMenu, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
-        setScreen("Main Menu");
 
-        CCNode* btnSprite = nullptr;
-        if (auto* spr = CCSprite::createWithSpriteFrameName("GJ_statsBtn_001.png")) {
-            spr->setScale(0.80f);
-            auto lbl = CCLabelBMFont::create("HUD", "chatFont.fnt");
-            lbl->setScale(0.33f);
-            lbl->setPosition(CCPoint(spr->getContentSize().width / 2.f, -9.f));
-            spr->addChild(lbl);
-            btnSprite = spr;
-        } else {
-            btnSprite = ButtonSprite::create("HUD");
-        }
+        // Plain icon (no text under it: it looked bad inside the right-side menu).
+        CCNode* btnSprite = CCSprite::createWithSpriteFrameName("GJ_statsBtn_001.png");
+        if (!btnSprite) btnSprite = ButtonSprite::create("HUD");
+        btnSprite->setScale(0.80f);
 
         auto btn = CCMenuItemSpriteExtra::create(
             btnSprite, this, menu_selector(UACIMenu::onHUD));
@@ -102,7 +86,6 @@ class $modify(UACIBase, GJBaseGameLayer) {
 class $modify(UACIPlay, PlayLayer) {
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
         if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
-        setScreen("Level");
         g_clickTimestamps.clear();
         resetAccuracy();
         setOverlayHidden(g_config.hideOnEnterLevel);   // also un-hides if the option is off
@@ -137,32 +120,5 @@ class $modify(UACIPlay, PlayLayer) {
     void onQuit() {
         setOverlayHidden(g_config.hideOnExitLevel);
         PlayLayer::onQuit();
-    }
-};
-
-// ── Screen tracking ───────────────────────────────────────────────────────────
-
-class $modify(UACIEditor, LevelEditorLayer) {
-    bool init(GJGameLevel* l, bool a) {
-        if (!LevelEditorLayer::init(l, a)) return false;
-        setScreen("Editor"); return true;
-    }
-};
-class $modify(UACIGarage, GJGarageLayer) {
-    bool init() {
-        if (!GJGarageLayer::init()) return false;
-        setScreen("Icon Kit"); return true;
-    }
-};
-class $modify(UACICreator, CreatorLayer) {
-    bool init() {
-        if (!CreatorLayer::init()) return false;
-        setScreen("Creator Menu"); return true;
-    }
-};
-class $modify(UACILvlSel, LevelSelectLayer) {
-    bool init(int page) {
-        if (!LevelSelectLayer::init(page)) return false;
-        setScreen("Level Select"); return true;
     }
 };

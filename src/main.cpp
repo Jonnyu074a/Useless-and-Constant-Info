@@ -1,6 +1,5 @@
 #include <Geode/Geode.hpp>
 #include <Geode/loader/SettingV3.hpp>
-#include <Geode/modify/AppDelegate.hpp>
 #include "../include/LabelConfig.hpp"
 #include "../include/UACI.hpp"
 #include "../include/InfoOverlay.hpp"
@@ -10,6 +9,9 @@ using namespace geode::prelude;
 using namespace uaci;
 
 $execute {
+    // NOTE: no AppDelegate hook on purpose. Hooking applicationWillResignActive crashed on
+    // Android when the app lost focus. Play time is flushed from the overlay every 30 s instead.
+
     // Load saved settings into g_config
     g_config.load();
 
@@ -25,12 +27,3 @@ $execute {
         refreshOverlay();
     });
 }
-
-// Flush accumulated play time when the game goes to background
-// (the overlay also flushes every 60 s as a safety net).
-class $modify(AppDelegateHook, AppDelegate) {
-    void applicationWillResignActive() {
-        uaci::flushPlayTime();
-        AppDelegate::applicationWillResignActive();
-    }
-};
