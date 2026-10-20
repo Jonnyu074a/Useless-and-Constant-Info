@@ -2,6 +2,7 @@
 #include <Geode/modify/MenuLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
 #include "../../include/UACI.hpp"
 #include "../../include/LabelConfig.hpp"
 #include "../../include/InfoOverlay.hpp"
@@ -34,14 +35,28 @@ class $modify(UACIMenu, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        // Plain icon (no text under it: it looked bad inside the right-side menu).
-        CCNode* btnSprite = CCSprite::createWithSpriteFrameName("GJ_statsBtn_001.png");
+        // Own icon (a flat white glyph). With Lazer UI the button is moved into its toolbar
+        // and its sprite is snapshotted, so a flat glyph matches the toolbar's icons and is
+        // not mistaken for the vanilla "statistics" button. Otherwise: a normal round button.
+        CCNode* btnSprite = nullptr;
+        if (Loader::get()->isModLoaded("kamol1dn.lazer-ui")) {
+            if (auto* flat = CCSprite::create("hud-icon.png"_spr)) {
+                flat->setScale(0.75f);
+                btnSprite = flat;
+            }
+        } else {
+            btnSprite = CircleButtonSprite::createWithSprite(
+                "hud-icon.png"_spr, 0.85f, CircleBaseColor::Green, CircleBaseSize::Medium);
+        }
+        if (!btnSprite) {   // resource missing: fall back to a vanilla icon, then to text
+            btnSprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+            if (btnSprite) btnSprite->setScale(0.8f);
+        }
         if (!btnSprite) btnSprite = ButtonSprite::create("HUD");
-        btnSprite->setScale(0.80f);
 
         auto btn = CCMenuItemSpriteExtra::create(
             btnSprite, this, menu_selector(UACIMenu::onHUD));
-        btn->setID("uaci-hud-button");
+        btn->setID("info-overlay-button"_spr);   // Lazer UI tooltip: "info overlay"
 
         // The Daily Chest lives inside "right-side-menu" (not directly in MenuLayer),
         // so add our button to that same menu and let its layout place it next to the chest.

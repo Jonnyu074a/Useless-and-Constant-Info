@@ -1,3 +1,16 @@
+# Ronda 3: integración con Lazer UI (kamol1dn.lazer-ui)
+
+Se revisó el código fuente de Lazer UI. **No se copió ni se fusionó nada de su código** (el repo no tiene licencia, sus sonidos son CC-BY-NC y su README dice que nunca irá al índice de Geode). La integración es solo de compatibilidad, usando su propio mecanismo público:
+
+- Lazer UI recoge un frame después de `MenuLayer::init` los botones que otros mods dejan en `bottom-menu`, `right-side-menu`, `side-menu`, `top-right-menu` y `profile-menu`, copia su sprite y usa el ID del nodo como tooltip. Nuestro botón ya cumplía eso, pero:
+  - usaba el sprite de estadísticas → **icono propio** (`resources/hud-icon.png`, glifo blanco plano; botón redondo cuando Lazer UI no está).
+  - ID `uaci-hud-button` → ahora `info-overlay-button`_spr (tooltip "info overlay").
+- Las pantallas de Lazer UI son nodos dentro de `MenuLayer` con ID `kamol1dn.lazer-ui/<nombre>`; `detectScreenName()` los reconoce (solo si ese mod está cargado).
+
+**Por verificar en el dispositivo:** que los overlays cerrados de Lazer UI estén realmente con `visible=false` (si no, la etiqueta podría seguir mostrando su nombre tras cerrarlos), y que `resources/hud-icon.png` se empaquete (`"hud-icon.png"_spr`).
+
+---
+
 # Ronda 2 (bugs reportados en el dispositivo)
 
 - **Crash al volver al juego** (`AppDelegate::pauseSound()`, SIGILL): eliminado el hook de `AppDelegate`. El tiempo de juego se guarda cada 30 s desde el overlay.

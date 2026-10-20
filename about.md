@@ -31,4 +31,9 @@ Open the settings with the **stats icon** next to the Daily Chest on the main me
 
 The separator splits the format into parts; a part whose tags are all empty is hidden automatically.
 
+## Compatibility
+
+- **Lazer UI** (`kamol1dn.lazer-ui`): the HUD button moves into its toolbar and the screen label shows its screens.
+- **MegaHack / OpenHack** and other mods: their menus are detected and named in the screen label.
+
 *Supported platforms: Windows and Android.*

@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cmath>
 #include <cctype>
+#include <climits>
 #include <vector>
 #include <algorithm>
 
@@ -179,6 +180,40 @@ static CCNode* topAlert(CCNode* parent) {
     return top;
 }
 
+
+// Lazer UI (kamol1dn.lazer-ui) draws its own screens as overlay nodes inside MenuLayer,
+// identified by "kamol1dn.lazer-ui/<name>" node IDs. Returns the top-most visible one.
+static std::string lazerScreen(CCNode* layer) {
+    if (!layer || !layer->getChildren()) return {};
+    if (!Loader::get()->isModLoaded("kamol1dn.lazer-ui")) return {};
+
+    static const std::pair<const char*, const char*> names[] = {
+        {"settings", "Lazer Settings"}, {"song-select", "Song Select"},
+        {"level-listing", "Level Listing"}, {"level-page", "Level Page"},
+        {"statistics", "Statistics"}, {"achievements", "Achievements"},
+        {"leaderboards", "Leaderboards"}, {"friends", "Friends"},
+        {"quests", "Quests"}, {"paths", "Paths"}, {"shop", "Shop"},
+        {"now-playing", "Now Playing"},
+    };
+    const std::string prefix = "kamol1dn.lazer-ui/";
+
+    std::string best;
+    int bestZ = INT_MIN;
+    for (auto* child : CCArrayExt<CCNode*>(layer->getChildren())) {
+        if (!child || !child->isVisible()) continue;
+        std::string id = std::string(child->getID());
+        if (id.rfind(prefix, 0) != 0) continue;
+        std::string key = id.substr(prefix.size());
+        for (auto& [k, v] : names) {
+            if (key == k && child->getZOrder() >= bestZ) {
+                best  = v;
+                bestZ = child->getZOrder();
+            }
+        }
+    }
+    return best;
+}
+
 std::string detectScreenName() {
     static std::string last = "Menu";
 
@@ -194,8 +229,12 @@ std::string detectScreenName() {
     if (!node) node = topAlert(scene);
 
     // 2) Otherwise the main layer of the scene.
-    if (!node && scene->getChildren() && scene->getChildren()->count() > 0)
+    if (!node && scene->getChildren() && scene->getChildren()->count() > 0) {
         node = static_cast<CCNode*>(scene->getChildren()->objectAtIndex(0));
+        // Lazer UI's own screens live inside MenuLayer: name them instead of "Main Menu".
+        std::string lz = lazerScreen(node);
+        if (!lz.empty()) { last = lz; return last; }
+    }
 
     if (node) last = prettyClassName(std::string(geode::cocos::getObjectName(node)));
     return last;

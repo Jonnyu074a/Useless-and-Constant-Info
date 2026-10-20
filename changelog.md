@@ -1,5 +1,12 @@
 # Changelog
 
+## v5.3.0
+
+### New
+- **Lazer UI compatibility** (`kamol1dn.lazer-ui`): the HUD button now has its own icon (it used to look like the vanilla statistics button inside Lazer UI's toolbar) and shows as "info overlay"
+- The current-screen label recognizes Lazer UI's own screens: Settings, Song Select, Level Listing, Level Page, Statistics, Achievements, Leaderboards, Friends, Quests, Paths, Shop and Now Playing
+- Own HUD button icon (flat white glyph; round button when Lazer UI is not installed)
+
 ## v5.2.1
 
 ### Fixes
