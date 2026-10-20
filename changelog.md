@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.2.1
+
+### Fixes
+- Fixed "Invalid Geode File" (missing `info` in the `issues` block of `mod.json`)
+- Repository links now point to the real repository
+
 ## v5.2.0
 
 ### Fixes
